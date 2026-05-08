@@ -1,0 +1,37 @@
+# Terraform working directories and generated files
+.terraform/
+terraform/.terraform/
+*.tfstate
+*.tfstate.*
+crash.log
+crash.*.log
+
+# Terraform variable files can contain local or sensitive values
+*.tfvars
+*.tfvars.json
+terraform/*.tfvars
+terraform/*.tfvars.json
+!*.tfvars.example
+!terraform/*.tfvars.example
+
+# Terraform plan outputs
+*.tfplan
+plan.out
+terraform/*.tfplan
+terraform/plan.out
+
+# Override files are usually local-only
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# Lock files from editors and operating systems
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+
+# Local IDE settings
+.idea/
+.vscode/
