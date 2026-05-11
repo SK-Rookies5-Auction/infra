@@ -35,6 +35,22 @@ resource "aws_iam_role_policy" "external_secrets" {
           "secretsmanager:ListSecretVersionIds"
         ]
         Resource = aws_secretsmanager_secret.app.arn
+      },
+      {
+        Sid    = "ReadApplicationParameters"
+        Effect = "Allow"
+        Action = [
+          "ssm:GetParameter",
+          "ssm:GetParameters",
+          "ssm:GetParametersByPath"
+        ]
+        Resource = "arn:aws:ssm:${var.aws_region}:*:parameter/${var.project_name}/${var.environment}/*"
+      },
+      {
+        Sid      = "DescribeApplicationParameters"
+        Effect   = "Allow"
+        Action   = "ssm:DescribeParameters"
+        Resource = "*"
       }
     ]
   })
@@ -71,5 +87,6 @@ resource "helm_release" "external_secrets" {
   depends_on = [
     aws_eks_node_group.main,
     aws_iam_role_policy.external_secrets,
+    helm_release.aws_load_balancer_controller,
   ]
 }

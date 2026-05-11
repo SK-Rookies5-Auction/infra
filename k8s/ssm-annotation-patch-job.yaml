@@ -1,0 +1,111 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: ssm-annotation-patcher
+  namespace: rookies5-macta
+  annotations:
+    argocd.argoproj.io/sync-wave: "3"
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: ssm-annotation-patcher
+  namespace: rookies5-macta
+  annotations:
+    argocd.argoproj.io/sync-wave: "3"
+rules:
+  - apiGroups: [""]
+    resources: ["serviceaccounts"]
+    verbs: ["get", "patch"]
+  - apiGroups: ["networking.k8s.io"]
+    resources: ["ingresses"]
+    verbs: ["get", "patch"]
+  - apiGroups: ["apps"]
+    resources: ["deployments"]
+    verbs: ["get", "patch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: ssm-annotation-patcher
+  namespace: rookies5-macta
+  annotations:
+    argocd.argoproj.io/sync-wave: "3"
+subjects:
+  - kind: ServiceAccount
+    name: ssm-annotation-patcher
+    namespace: rookies5-macta
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: ssm-annotation-patcher
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: ssm-annotation-patcher
+  namespace: rookies5-macta
+  annotations:
+    argocd.argoproj.io/hook: PostSync
+    argocd.argoproj.io/hook-delete-policy: BeforeHookCreation,HookSucceeded
+    argocd.argoproj.io/sync-wave: "3"
+spec:
+  backoffLimit: 3
+  template:
+    spec:
+      restartPolicy: OnFailure
+      serviceAccountName: ssm-annotation-patcher
+      containers:
+        - name: kubectl
+          image: bitnami/kubectl:latest
+          env:
+            - name: BACKEND_ROLE_ARN
+              valueFrom:
+                secretKeyRef:
+                  name: rookies5-macta-infra-config
+                  key: BACKEND_ROLE_ARN
+            - name: WAF_WEB_ACL_ARN
+              valueFrom:
+                secretKeyRef:
+                  name: rookies5-macta-infra-config
+                  key: WAF_WEB_ACL_ARN
+            - name: ACM_CERTIFICATE_ARN
+              valueFrom:
+                secretKeyRef:
+                  name: rookies5-macta-infra-config
+                  key: ACM_CERTIFICATE_ARN
+            - name: BACKEND_IMAGE
+              valueFrom:
+                secretKeyRef:
+                  name: rookies5-macta-infra-config
+                  key: BACKEND_IMAGE
+            - name: FRONTEND_IMAGE
+              valueFrom:
+                secretKeyRef:
+                  name: rookies5-macta-infra-config
+                  key: FRONTEND_IMAGE
+          command:
+            - /bin/sh
+            - -c
+            - |
+              set -eu
+              kubectl annotate serviceaccount backend-sa \
+                eks.amazonaws.com/role-arn="${BACKEND_ROLE_ARN}" \
+                -n rookies5-macta --overwrite
+
+              kubectl annotate ingress rookies5-macta-frontend-ingress \
+                alb.ingress.kubernetes.io/wafv2-acl-arn="${WAF_WEB_ACL_ARN}" \
+                alb.ingress.kubernetes.io/certificate-arn="${ACM_CERTIFICATE_ARN}" \
+                alb.ingress.kubernetes.io/listen-ports='[{"HTTP":80},{"HTTPS":443}]' \
+                alb.ingress.kubernetes.io/ssl-redirect="443" \
+                -n rookies5-macta --overwrite
+
+              kubectl set image deployment/rookies5-macta-backend \
+                backend="${BACKEND_IMAGE}" \
+                -n rookies5-macta
+
+              kubectl set image deployment/rookies5-macta-frontend \
+                frontend="${FRONTEND_IMAGE}" \
+                -n rookies5-macta
+
+              kubectl rollout restart deployment rookies5-macta-backend -n rookies5-macta
