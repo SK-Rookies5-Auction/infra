@@ -57,6 +57,11 @@ spec:
               value: regional
             - name: AWS_EC2_METADATA_DISABLED
               value: "true"
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: backend-secret
+                  key: JWT_SECRET
             - name: S3_BUCKET_NAME
               valueFrom:
                 secretKeyRef:
