@@ -66,6 +66,21 @@ spec:
                 secretKeyRef:
                   name: backend-secret
                   key: JWT_SECRET
+            - name: REDIS_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: backend-secret
+                  key: REDIS_HOST
+            - name: REDIS_PORT
+              valueFrom:
+                secretKeyRef:
+                  name: backend-secret
+                  key: REDIS_PORT
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: backend-secret
+                  key: REDIS_PASSWORD
             - name: S3_BUCKET_NAME
               valueFrom:
                 secretKeyRef:
