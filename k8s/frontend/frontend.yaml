@@ -20,7 +20,7 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: 105588835975.dkr.ecr.ap-northeast-2.amazonaws.com/rookies5-macta/frontend:80a96069ad93bda3b429f33983cc7502d872f946
+          image: 105588835975.dkr.ecr.ap-northeast-2.amazonaws.com/rookies5-macta/frontend:876835eb574731798dbcdb743d29335e777a938d
           ports:
             - containerPort: 80
           readinessProbe:
