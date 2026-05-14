@@ -53,6 +53,7 @@ flowchart TB
   end
 
   ssm[SSM Parameter Store]
+  cw[CloudWatch<br/>logs and metrics]
   ecr[ECR<br/>frontend/backend images]
   s3[S3 Bucket<br/>rookies5-team4-macta-bucket]
   irsa[IRSA IAM Roles]
@@ -84,6 +85,9 @@ flowchart TB
   patch -->|patch SA, Ingress, image| ing
   irsa --> eso
   irsa --> bePod
+  eks -->|cluster and workload metrics/logs| cw
+  alb -->|access metrics| cw
+  rds -->|database metrics/logs| cw
 ```
 
 ## 요청 라우팅
@@ -136,6 +140,7 @@ VITE_API_BASE_URL=/api/v1
 | Load Balancing | AWS Load Balancer Controller, ALB Ingress |
 | Security | WAFv2 Web ACL, ACM Certificate, IAM Policy/Role |
 | Secrets | SSM Parameter Store, External Secrets Operator |
+| Monitoring | CloudWatch logs and metrics |
 | GitOps | Argo CD Application manifests |
 
 ## 디렉터리 구조
