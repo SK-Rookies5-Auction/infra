@@ -126,3 +126,29 @@ resource "aws_wafv2_web_acl" "app" {
     Name = "${var.project_name}-${var.environment}-web-acl"
   }
 }
+
+resource "aws_cloudwatch_log_group" "waf" {
+  name              = "aws-waf-logs-${var.project_name}-${var.environment}-web-acl"
+  retention_in_days = var.waf_log_retention_days
+
+  tags = {
+    Name = "${var.project_name}-${var.environment}-waf-logs"
+  }
+}
+
+resource "aws_wafv2_web_acl_logging_configuration" "app" {
+  resource_arn            = aws_wafv2_web_acl.app.arn
+  log_destination_configs = [aws_cloudwatch_log_group.waf.arn]
+
+  redacted_fields {
+    single_header {
+      name = "authorization"
+    }
+  }
+
+  redacted_fields {
+    single_header {
+      name = "cookie"
+    }
+  }
+}

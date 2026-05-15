@@ -647,6 +647,51 @@ WAF는 생성만으로 ALB에 자동 연결되지 않습니다. 현재 구조에
 alb.ingress.kubernetes.io/wafv2-acl-arn=<WAF_WEB_ACL_ARN>
 ```
 
+WAF는 CloudWatch Metrics와 full request logging을 모두 사용합니다.
+
+- CloudWatch Metrics: rule별 `AllowedRequests`, `BlockedRequests` 지표 확인
+- Sampled requests: WAF Console에서 일부 요청 샘플 확인
+- CloudWatch Logs full logging: WAF를 통과하거나 차단된 요청 상세 로그 저장
+
+Terraform은 WAF 로그 저장용 CloudWatch Log Group을 생성합니다.
+
+```text
+aws-waf-logs-rookies5-macta-dev-web-acl
+```
+
+WAF logging 설정:
+
+```text
+aws_wafv2_web_acl_logging_configuration
+  -> aws_cloudwatch_log_group.waf
+```
+
+로그에는 요청 IP, URI, HTTP method, User-Agent, WAF action, rule match 정보 등이 저장됩니다. `authorization`, `cookie` 헤더는 민감정보 노출을 줄이기 위해 redaction 처리합니다.
+
+확인:
+
+```powershell
+terraform output -raw waf_log_group_name
+```
+
+CloudWatch Logs Insights 예시:
+
+```sql
+fields @timestamp, action, terminatingRuleId, httpRequest.clientIp, httpRequest.uri, httpRequest.httpMethod
+| sort @timestamp desc
+| limit 50
+```
+
+Rate Limit 차단 요청만 확인:
+
+```sql
+fields @timestamp, action, terminatingRuleId, httpRequest.clientIp, httpRequest.uri
+| filter action = "BLOCK"
+| filter terminatingRuleId = "RateLimitPerIp"
+| sort @timestamp desc
+| limit 50
+```
+
 &nbsp;
 ## Argo CD
 ### EKS 배포 애플리케이션 상태 확인
