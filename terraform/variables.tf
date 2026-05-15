@@ -109,6 +109,12 @@ variable "waf_rate_limit_per_5_minutes" {
   }
 }
 
+variable "waf_log_retention_days" {
+  description = "CloudWatch Logs retention period for AWS WAF full request logs"
+  type        = number
+  default     = 14
+}
+
 variable "node_instance_type" {
   description = "워커 노드 EC2 인스턴스 타입"
   type        = string

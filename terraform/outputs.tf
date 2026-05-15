@@ -112,6 +112,11 @@ output "waf_ingress_annotation" {
   value       = "alb.ingress.kubernetes.io/wafv2-acl-arn: ${aws_wafv2_web_acl.app.arn}"
 }
 
+output "waf_log_group_name" {
+  description = "CloudWatch Logs log group name for AWS WAF full request logs"
+  value       = aws_cloudwatch_log_group.waf.name
+}
+
 output "app_secret_arn" {
   description = "AWS Secrets Manager secret ARN for application runtime secrets"
   value       = aws_secretsmanager_secret.app.arn
