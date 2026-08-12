@@ -14,7 +14,7 @@ SK쉴더스 루키즈 개발 5기 미니프로젝트3 실시간 경매 사이트
 
 &nbsp;
 ## 인프라 아키텍처
-<img width="2560" height="1480" alt="macta-infra" src="https://github.com/user-attachments/assets/943ecec8-e903-4007-aa2d-4df5ea8f31b6" />
+<img width="2562" height="1480" alt="macta-infra" src="https://github.com/user-attachments/assets/62a06b0d-4854-4adc-be0a-9bf3a01889ce" />
 
 
 ```mermaid
